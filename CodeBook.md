@@ -1,22 +1,10 @@
 # Getting and Cleaning Data Course Project 
 
-## Dataframes and Vectors created: 
+## Results
 
-### dirty_columns
-A dataframe containing the features measured, this was used to name columns by cleaning the names with grep and gsub ending with a clean_fields vector.
+The results of this project are two tidy dataframes (smartlab_subset, means_subject_activity) that contains the data extracted from  Human Activity Recognition Using Smartphones Dataset Version 1.0 (www.smartlab.ws)
 
-### df_train 
-A tidy dataframe containing the data from Human Activity Recognition Using Smartphones Dataset
-Version 1.0 (www.smartlab.ws) train data set with just mean and std mesurements extracted and with subject and activity as columns
-
-### df_test 
-A tidy dataframe containing the data from Human Activity Recognition Using Smartphones Dataset
-Version 1.0 (www.smartlab.ws) test data set with just mean and std mesurements extracted and with subject and activity as columns
-
-### activity_labels
-A dataframe containing apropiate labels for activities
-
-### df
+### smartlab_subset dataframe
 A tidy dataframe containing both train and test data sets from Human Activity Recognition Using Smartphones Dataset
 Version 1.0 (www.smartlab.ws) merged. Just mean and std mesurements were extracted and subject and activity columns were added. The activity column is a factor with the following levels and labels:
 
@@ -32,10 +20,12 @@ level | lebel
 #### The measurment columns 
 
 
-This dataframe contains processed data from the accelerometer and gyroscope 3-axial raw signals. 
+This dataframe contains direct and derived data from the accelerometer and gyroscope 3-axial raw signals. 
 
+Direct measurements:
+(t_body_acc_xyz, t_gravity_acc_xyz, t_body_gyro_xyz) 
 Jerk signals:
-(t_body_acc_jerk_xyz and t_body_gyro_xyz). 
+(t_body_acc_jerk_xyz and t_body_gyro_jerk_xyz). 
 The magnitude using the Euclidean norm:
 (tBodyAccMag, tGravityAccMag, tBodyAccJerkMag, tBodyGyroMag, tBodyGyroJerkMag). 
 The Fast Fourier Transform (FFT) of the signals: 
@@ -121,6 +111,5 @@ activity
 ### means_subject_activity
 A tidy dataframe containing the mean for each activity and subject of all the measurments extracted in df dataframe
 
-### clean_fields
-A vector containing clean names for the columns of the data from test and train data sets
+
 

@@ -45,12 +45,12 @@ y_test_path <- "uci_har_dataset/test/y_test.txt"
 df_test <- ensamble_dataframe(s_test_path, x_test_path, y_test_path, clean_fields)
 
 #merge test and train dataframes
-df <- rbind(df_train, df_test)
+smartlab_subset <- rbind(df_train, df_test)
 
 #add apropiate labels to activity column
 activity_labels_table <- read.table("uci_har_dataset/activity_labels.txt", quote="\"", comment.char="")
 activity_labels <- as.character(activity_labels_table[,2])
-df$activity = factor(df$activity, levels = sort(unique(df$activity)), labels = activity_labels)
+smartlab_subset$activity = factor(smartlab_subset$activity, levels = sort(unique(smartlab_subset$activity)), labels = activity_labels)
 
 #get mean of each measurement by subject and activity in a tidy dataframe
-means_subject_activity <- df %>% group_by(subject, activity) %>% summarise_at(vars(1:66), funs(mean(., na.rm=TRUE)))
+means_subject_activity <- smartlab_subset %>% group_by(subject, activity) %>% summarise_at(vars(1:66), funs(mean(., na.rm=TRUE)))
