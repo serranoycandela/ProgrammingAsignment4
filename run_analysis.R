@@ -54,3 +54,6 @@ smartlab_subset$activity = factor(smartlab_subset$activity, levels = sort(unique
 
 #get mean of each measurement by subject and activity in a tidy dataframe
 means_subject_activity <- smartlab_subset %>% group_by(subject, activity) %>% summarise_at(vars(1:66), funs(mean(., na.rm=TRUE)))
+
+#write a txt file with means_subject_activity dataframe
+write.table(means_subject_activity, "means_subject_activity.txt", row.name=FALSE)
