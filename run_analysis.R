@@ -22,26 +22,29 @@ ensamble_dataframe <- function(subject_path, x_path, y_path, clean_fields){
     df
 }
 
+## get clean column names from dirty names in features.txt
 dirty_columns <- read.table("uci_har_dataset/features.txt", quote="\"", comment.char="")
-fields <- as.character(dirty_columns[[2]])
-fields <- sub("\\(\\)", "", fields, perl=TRUE) #remove "()"
-fields <- sub(",", "_", fields, perl=TRUE) #subtitute "," for "_"
-fields <- gsub("-", "_", fields, perl=TRUE) #subtitute "-" for "_"
-fields <- gsub("([a-z])([A-Z])", "\\1_\\L\\2", fields, perl = TRUE) #CamelCase to _lowercase
-clean_fields <- gsub("([A-Z])", "\\L\\1", fields, perl = TRUE) #"X|Y|Z" to "z|x|y"
+clean_fields <- as.character(dirty_columns[[2]])
+clean_fields <- sub("\\(\\)", "", clean_fields, perl=TRUE) #remove "()"
+clean_fields <- sub(",", "_", clean_fields, perl=TRUE) #subtitute "," for "_"
+clean_fields <- gsub("-", "_", clean_fields, perl=TRUE) #subtitute "-" for "_"
+clean_fields <- gsub("([a-z])([A-Z])", "\\1_\\L\\2", clean_fields, perl = TRUE) #Camel to _lower
+clean_fields <- gsub("([A-Z])", "\\L\\1", clean_fields, perl = TRUE) #"X|Y|Z" to "z|x|y"
 
 
+#get train dataframe
 s_train_path <- "uci_har_dataset/train/subject_train.txt"
 x_train_path <- "uci_har_dataset/train/X_train.txt"
 y_train_path <- "uci_har_dataset/train/y_train.txt"
 df_train <- ensamble_dataframe(s_train_path, x_train_path, y_train_path, clean_fields)
 
+#get test dataframe
 s_test_path <- "uci_har_dataset/test/subject_test.txt"
 x_test_path <- "uci_har_dataset/test/X_test.txt"
 y_test_path <- "uci_har_dataset/test/y_test.txt"
 df_test <- ensamble_dataframe(s_test_path, x_test_path, y_test_path, clean_fields)
 
-#merge test and train data sets
+#merge test and train dataframes
 df <- rbind(df_train, df_test)
 
 #add apropiate labels to activity column
@@ -49,5 +52,5 @@ activity_labels_table <- read.table("uci_har_dataset/activity_labels.txt", quote
 activity_labels <- as.character(activity_labels_table[,2])
 df$activity = factor(df$activity, levels = sort(unique(df$activity)), labels = activity_labels)
 
-#get mean of each measurement by subject and activity
+#get mean of each measurement by subject and activity in a tidy dataframe
 means_subject_activity <- df %>% group_by(subject, activity) %>% summarise_at(vars(1:66), funs(mean(., na.rm=TRUE)))
