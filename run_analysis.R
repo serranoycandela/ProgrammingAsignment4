@@ -1,10 +1,10 @@
 library("dplyr")
 
 ensamble_dataframe <- function(subject_path, x_path, y_path, clean_fields){
-    ## this function reads from 3 files to make a dataframe and asign clean 
+    ## this function reads from 3 text files to make a dataframe and asign clean 
     ## column names to it using clean_fields parameter
   
-    ## read tables
+    ## read text files
     subject <- read.table(subject_path, quote="\"", comment.char="")
     x <- read.table(x_path, quote="\"", comment.char="")
     y <- read.table(y_path, quote="\"", comment.char="")
