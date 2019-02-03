@@ -1,79 +1,53 @@
 library("dplyr")
 
-features <- read.table("uci_har_dataset/features.txt", 
-                       quote="\"", comment.char="")
+ensamble_dataframe <- function(subject_path, x_path, y_path, clean_fields){
+    ## this function reads from 3 files to make a dataframe and asign clean 
+    ## column names to it using clean_fields parameter
+  
+    ## read tables
+    subject <- read.table(subject_path, quote="\"", comment.char="")
+    x <- read.table(x_path, quote="\"", comment.char="")
+    y <- read.table(y_path, quote="\"", comment.char="")
+    
+    #asign clean names to columns
+    names(x) <- clean_fields
+    
+    #get only the columns that start with a t ot an f and where there is a _mean_[xyz] 
+    #or a _mean or a _std_[xyz] or a _std
+    x <- x[grep("^[f-t](.*)_mean((_[x-z])?)$|^[f-t](.*)_std((_[x-z])?)$", clean_fields)]
+    
+    #add subject and activity
+    df <- mutate(x, subject = subject[[1]])
+    df <- mutate(df, activity = y[[1]])
+    df
+}
 
-fields <- as.character(features[[2]])
-
-#remove "()"
-fields <- sub("\\(\\)", "", fields, perl=TRUE) 
-
-#subtitute , for _
-fields <- sub(",", "_", fields, perl=TRUE)
-
-#subtitute - for _
-fields <- gsub("-", "_", fields, perl=TRUE)
-
-#subtitute capital_character for _lowercase(capital_character)
-fields <- gsub("([a-z])([A-Z])", "\\1_\\L\\2", fields, perl = TRUE) 
-
-#XYZ to zxy
-fields <- gsub("([A-Z])", "\\L\\1", fields, perl = TRUE)
-
-subject_train <- read.table("uci_har_dataset/train/subject_train.txt", 
-                                 quote="\"", comment.char="")
-
-x_train <- read.table("uci_har_dataset/train/X_train.txt", 
-                            quote="\"", comment.char="")
-
-names(x_train) <- fields
-
-#get only the columns that start with a t ot an f ans where there is a _mean_[xyz] 
-#or a _mean or a _std_[xyz] or a _std
-x_train <- x_train[grep("^[f-t](.*)_mean((_[x-z])?)$|^[f-t](.*)_std((_[x-z])?)$", fields)]
-
-y_train <- read.table("uci_har_dataset/train/y_train.txt", 
-                      quote="\"", comment.char="")
-
-df_train <- mutate(x_train, subject = subject_train[[1]])
-df_train <- mutate(df_train, activity = y_train[[1]])
+dirty_columns <- read.table("uci_har_dataset/features.txt", quote="\"", comment.char="")
+fields <- as.character(dirty_columns[[2]])
+fields <- sub("\\(\\)", "", fields, perl=TRUE) #remove "()"
+fields <- sub(",", "_", fields, perl=TRUE) #subtitute "," for "_"
+fields <- gsub("-", "_", fields, perl=TRUE) #subtitute "-" for "_"
+fields <- gsub("([a-z])([A-Z])", "\\1_\\L\\2", fields, perl = TRUE) #CamelCase to _lowercase
+clean_fields <- gsub("([A-Z])", "\\L\\1", fields, perl = TRUE) #"X|Y|Z" to "z|x|y"
 
 
-subject_test <- read.table("uci_har_dataset/test/subject_test.txt", 
-                            quote="\"", comment.char="")
+s_train_path <- "uci_har_dataset/train/subject_train.txt"
+x_train_path <- "uci_har_dataset/train/X_train.txt"
+y_train_path <- "uci_har_dataset/train/y_train.txt"
+df_train <- ensamble_dataframe(s_train_path, x_train_path, y_train_path, clean_fields)
 
-x_test <- read.table("uci_har_dataset/test/X_test.txt", 
-                      quote="\"", comment.char="")
-names(x_test) <- fields
+s_test_path <- "uci_har_dataset/test/subject_test.txt"
+x_test_path <- "uci_har_dataset/test/X_test.txt"
+y_test_path <- "uci_har_dataset/test/y_test.txt"
+df_test <- ensamble_dataframe(s_test_path, x_test_path, y_test_path, clean_fields)
 
-#get only the columns that start with a t ot an f ans where there is a _mean_[xyz] 
-#or a _mean or a _std_[xyz] or a _std
-x_test <- x_test[grep("^[f-t](.*)_mean((_[x-z])?)$|^[f-t](.*)_std((_[x-z])?)$", fields)]
-
-y_test <- read.table("uci_har_dataset/test/y_test.txt", 
-                      quote="\"", comment.char="")
-
-df_test <- mutate(x_test, subject = subject_test[[1]])
-df_test <- mutate(df_test, activity = y_test[[1]])
-
-
+#merge test and train data sets
 df <- rbind(df_train, df_test)
 
-activity_labels_table <- read.table("uci_har_dataset/activity_labels.txt", 
-                              quote="\"", comment.char="")
-
-
+#add apropiate labels to activity column
+activity_labels_table <- read.table("uci_har_dataset/activity_labels.txt", quote="\"", comment.char="")
 activity_labels <- as.character(activity_labels_table[,2])
-
 df$activity = factor(df$activity, levels = sort(unique(df$activity)), labels = activity_labels)
 
+#get mean of each measurement by subject and activity
 means_subject_activity <- df %>% group_by(subject, activity) %>% summarise_at(vars(1:66), funs(mean(., na.rm=TRUE)))
-
-# spl <- split(df, df[,c('subject','activity')])
-# sap <- sapply(spl, function(x) colMeans(x[,1:66]))
-# pas <- t(sap)
-# groups <- rownames(pas)
-# 
-# df_pas <- data.frame(pas)
-# df_pas$subject <- sapply(strsplit(as.character(groups),'[.]'), "[", 1)
-# df_pas$activity <- sapply(strsplit(as.character(groups),'[.]'), "[", 2)
