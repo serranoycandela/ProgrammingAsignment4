@@ -27,7 +27,9 @@ x_train <- read.table("uci_har_dataset/train/X_train.txt",
                             quote="\"", comment.char="")
 
 names(x_train) <- fields
-#get only the columns where there is a _mean_[xyz] or a _mean or a _std_[xyz] or a _std
+
+#get only the columns that start with a t ot an f ans where there is a _mean_[xyz] 
+#or a _mean or a _std_[xyz] or a _std
 x_train <- x_train[grep("^[f-t](.*)_mean((_[x-z])?)$|^[f-t](.*)_std((_[x-z])?)$", fields)]
 
 y_train <- read.table("uci_har_dataset/train/y_train.txt", 
@@ -44,7 +46,8 @@ x_test <- read.table("uci_har_dataset/test/X_test.txt",
                       quote="\"", comment.char="")
 names(x_test) <- fields
 
-#get only the columns where there is a _mean_[xyz] or a _mean or a _std_[xyz] or a _std
+#get only the columns that start with a t ot an f ans where there is a _mean_[xyz] 
+#or a _mean or a _std_[xyz] or a _std
 x_test <- x_test[grep("^[f-t](.*)_mean((_[x-z])?)$|^[f-t](.*)_std((_[x-z])?)$", fields)]
 
 y_test <- read.table("uci_har_dataset/test/y_test.txt", 
@@ -64,4 +67,13 @@ activity_labels <- as.character(activity_labels_table[,2])
 
 df$activity = factor(df$activity, levels = sort(unique(df$activity)), labels = activity_labels)
 
+means_subject_activity <- df %>% group_by(subject, activity) %>% summarise_at(vars(1:66), funs(mean(., na.rm=TRUE)))
 
+# spl <- split(df, df[,c('subject','activity')])
+# sap <- sapply(spl, function(x) colMeans(x[,1:66]))
+# pas <- t(sap)
+# groups <- rownames(pas)
+# 
+# df_pas <- data.frame(pas)
+# df_pas$subject <- sapply(strsplit(as.character(groups),'[.]'), "[", 1)
+# df_pas$activity <- sapply(strsplit(as.character(groups),'[.]'), "[", 2)
